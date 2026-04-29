@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nvoip Auth Widget Demo</title>
+    <link rel="stylesheet" href="../dist/nvoip-auth-widget.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #fff7ed 0%, #fdedd5 100%);
+        font-family: ui-sans-serif, system-ui, sans-serif;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 14px 22px;
+        background: #ea580c;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="demo-trigger">Abrir autenticacao</button>
+
+    <script src="../dist/nvoip-auth-widget.js"></script>
+    <script>
+      NvoipAuthWidget.mount(document.getElementById("demo-trigger"), {
+        async startVerification({ phone }) {
+          console.log("Mock start", phone);
+          return {
+            sessionId: "mock-session-id",
+            message: "Codigo enviado para " + phone,
+          };
+        },
+        async confirmVerification({ sessionId, code, phone }) {
+          console.log("Mock confirm", sessionId, code, phone);
+          if (code !== "123456") {
+            throw new Error("Codigo invalido. Use 123456 no mock.");
+          }
+
+          return {
+            status: "ok",
+          };
+        },
+        onSuccess({ phone }) {
+          alert("Telefone validado com sucesso: " + phone);
+        },
+      });
+    </script>
+  </body>
+  </html>
