@@ -1,6 +1,6 @@
 # nvoip-web-sdk
 
-Widget web embutivel para fluxo de autenticacao por telefone e codigo usando a API da Nvoip.
+SDK web oficial da [Nvoip](https://www.nvoip.com.br/) para embutir autenticação por telefone e código usando a API v2.
 
 ## Objetivo
 
