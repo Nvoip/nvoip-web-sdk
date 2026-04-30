@@ -132,8 +132,8 @@ PORT=3333
 
 Notas de integracao:
 
-- `sms` em `otp` usa `/otp` e `/check/otp`.
-- `voice` usa `/otp` com campo `voice` e `/check/otp`.
+- `sms` em `otp` usa `/otp` com `phoneNumber`, `methods.sms=true` e `/check/otp`.
+- `voice` usa `/otp` com `phoneNumber`, `methods.torpedo=true` e `/check/otp`.
 - `sms` em `2fa` usa `/2fa` e `/check/2fa`, portanto precisa de `NVOIP_NAPIKEY`.
 - `whatsapp` no exemplo usa `/wa/sendTemplates`; o backend gera o codigo, envia em um template aprovado e valida o codigo localmente.
 - O template de WhatsApp precisa estar aprovado e aceitar uma variavel de corpo para o codigo.

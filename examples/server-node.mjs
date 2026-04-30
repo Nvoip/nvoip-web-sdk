@@ -128,7 +128,11 @@ async function createAccessToken() {
 
 async function sendOtp(phone, channel) {
   const accessToken = await createAccessToken();
-  const body = channel === "voice" ? { voice: phone } : { sms: phone };
+  const apiMethod = channel === "voice" ? "torpedo" : channel;
+  const body = {
+    phoneNumber: phone,
+    methods: { [apiMethod]: true },
+  };
   const response = await fetch(`${baseUrl}/otp`, {
     method: "POST",
     headers: {
