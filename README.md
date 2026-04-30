@@ -104,6 +104,14 @@ npm run demo:real
 open http://127.0.0.1:3333
 ```
 
+Teste isolado do OAuth:
+
+```bash
+npm run oauth:test
+```
+
+O script confirma o OAuth e mascara `access_token` e `refresh_token` por padrao. Use `PRINT_ACCESS_TOKEN=1 npm run oauth:test` apenas em ambiente local se precisar ver o token bruto.
+
 Variaveis principais:
 
 ```env

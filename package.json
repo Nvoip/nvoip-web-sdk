@@ -6,8 +6,12 @@
   "browser": "dist/nvoip-auth-widget.js",
   "style": "dist/nvoip-auth-widget.css",
   "files": [
-    "dist",
-    "examples",
+    "dist/nvoip-auth-widget.css",
+    "dist/nvoip-auth-widget.js",
+    "examples/live-demo.html",
+    "examples/mock-demo.html",
+    "examples/oauth-token.mjs",
+    "examples/server-node.mjs",
     ".env.example",
     "README.md",
     "LICENSE"
@@ -15,6 +19,7 @@
   "scripts": {
     "demo:mock": "python3 -m http.server 4173 --bind 127.0.0.1",
     "demo:real": "node examples/server-node.mjs",
+    "oauth:test": "node examples/oauth-token.mjs",
     "pack:check": "npm pack --dry-run",
     "start": "node examples/server-node.mjs"
   },
