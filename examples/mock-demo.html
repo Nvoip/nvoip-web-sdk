@@ -4,74 +4,166 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nvoip Auth Widget Demo</title>
-    <link rel="stylesheet" href="../dist/nvoip-auth-widget.css" />
+    <link rel="stylesheet" href="../dist/nvoip-auth-widget.css?v=0.2.0" />
     <style>
       body {
         margin: 0;
         min-height: 100vh;
         display: grid;
         place-items: center;
-        background: linear-gradient(135deg, #fff7ed 0%, #fdedd5 100%);
-        font-family: ui-sans-serif, system-ui, sans-serif;
+        background:
+          radial-gradient(circle at 12% 20%, rgba(0, 163, 224, 0.2), transparent 28%),
+          radial-gradient(circle at 82% 14%, rgba(255, 131, 0, 0.18), transparent 24%),
+          linear-gradient(135deg, #f8fafc 0%, #fff7ed 100%);
+        color: #0f172a;
+        font-family: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
+      }
+
+      .demo-shell {
+        width: min(920px, calc(100vw - 32px));
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        align-items: center;
+      }
+
+      .demo-copy {
+        padding: 30px;
+      }
+
+      .demo-copy p:first-child {
+        margin: 0 0 12px;
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(34px, 5vw, 62px);
+        letter-spacing: -0.06em;
+        line-height: 1;
+      }
+
+      .demo-copy p:last-child {
+        max-width: 430px;
+        color: #475569;
+        font-size: 18px;
+        line-height: 1.55;
+      }
+
+      .demo-card {
+        padding: 28px;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.84);
+        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+      }
+
+      .demo-actions {
+        display: grid;
+        gap: 12px;
       }
 
       button {
         border: 0;
-        border-radius: 999px;
-        padding: 14px 22px;
-        background: #ea580c;
+        border-radius: 18px;
+        padding: 15px 18px;
+        background: #ff8300;
         color: #fff;
         font-size: 16px;
-        font-weight: 700;
+        font-weight: 850;
         cursor: pointer;
       }
 
-      .demo-shell {
-        display: grid;
-        gap: 18px;
-        justify-items: center;
+      button.secondary {
+        background: #eff6ff;
+        color: #1d4ed8;
       }
 
       .demo-status {
         min-height: 24px;
+        margin-top: 18px;
         color: #14532d;
-        font-weight: 700;
+        font-weight: 800;
+      }
+
+      .demo-hint {
+        margin-top: 14px;
+        color: #64748b;
+        font-size: 13px;
+      }
+
+      @media (max-width: 760px) {
+        .demo-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .demo-copy {
+          padding: 18px 8px 0;
+        }
       }
     </style>
   </head>
   <body>
     <main class="demo-shell">
-      <button id="demo-trigger">Abrir autenticacao</button>
-      <div id="demo-status" class="demo-status" role="status" aria-live="polite"></div>
+      <section class="demo-copy">
+        <p>NVOIP WEB SDK</p>
+        <h1>Validacao pronta para copiar e colar.</h1>
+        <p>
+          O desenvolvedor escolhe quais canais aparecem no front. Esta demo habilita WhatsApp, SMS e ligacao para
+          OTP e 2FA.
+        </p>
+      </section>
+
+      <section class="demo-card">
+        <div class="demo-actions">
+          <button id="demo-otp" type="button">Abrir OTP</button>
+          <button id="demo-2fa" class="secondary" type="button">Abrir 2FA</button>
+        </div>
+        <div id="demo-status" class="demo-status" role="status" aria-live="polite"></div>
+        <div class="demo-hint">Codigo mock: <strong>123456</strong></div>
+      </section>
     </main>
 
-    <script src="../dist/nvoip-auth-widget.js"></script>
+    <script src="../dist/nvoip-auth-widget.js?v=0.2.0"></script>
     <script>
       const status = document.getElementById("demo-status");
 
-      NvoipAuthWidget.mount(document.getElementById("demo-trigger"), {
-        async startVerification({ phone }) {
-          status.textContent = "";
-          console.log("Mock start", phone);
-          return {
-            sessionId: "mock-session-id",
-            message: "Codigo enviado para " + phone,
-          };
-        },
-        async confirmVerification({ sessionId, code, phone }) {
-          console.log("Mock confirm", sessionId, code, phone);
-          if (code !== "123456") {
-            throw new Error("Codigo invalido. Use 123456 no mock.");
-          }
+      function openDemo(flow) {
+        NvoipAuthWidget.open({
+          flow,
+          channels: ["whatsapp", "sms", "voice"],
+          accountLabel: "cliente.demo@nvoip.com.br",
+          phone: "11999991740",
+          closeOnSuccess: false,
+          helpText: "Ver documentacao da API",
+          helpHref: "https://nvoip.docs.apiary.io/",
+          async startVerification({ phone, channel, flow }) {
+            status.textContent = "";
+            console.log("Mock start", { phone, channel, flow });
+            return {
+              sessionId: "mock-" + flow + "-" + channel,
+              message: "Codigo mock enviado por " + channel + ".",
+            };
+          },
+          async confirmVerification({ sessionId, code, phone, channel, flow }) {
+            console.log("Mock confirm", { sessionId, code, phone, channel, flow });
+            if (code !== "123456") {
+              throw new Error("Codigo invalido. Use 123456 no mock.");
+            }
 
-          return {
-            status: "ok",
-          };
-        },
-        onSuccess({ phone }) {
-          status.textContent = "Telefone validado com sucesso: " + phone;
-        },
-      });
+            return { status: "ok" };
+          },
+          onSuccess({ phone, channel, flow }) {
+            status.textContent = flow.toUpperCase() + " validado por " + channel + " para " + phone + ".";
+          },
+        });
+      }
+
+      document.getElementById("demo-otp").addEventListener("click", () => openDemo("otp"));
+      document.getElementById("demo-2fa").addEventListener("click", () => openDemo("2fa"));
     </script>
   </body>
-  </html>
+</html>

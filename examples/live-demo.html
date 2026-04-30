@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nvoip Auth Widget Live Demo</title>
+    <link rel="stylesheet" href="/dist/nvoip-auth-widget.css?v=0.2.0" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at 18% 20%, rgba(0, 163, 224, 0.2), transparent 30%),
+          linear-gradient(140deg, #f8fafc 0%, #fff7ed 100%);
+        color: #0f172a;
+        font-family: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(760px, calc(100vw - 32px));
+        padding: 34px;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(32px, 5vw, 56px);
+        letter-spacing: -0.06em;
+        line-height: 1;
+      }
+
+      p {
+        color: #475569;
+        font-size: 17px;
+        line-height: 1.55;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 16px;
+        padding: 14px 18px;
+        background: #ff8300;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 850;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #eff6ff;
+        color: #1d4ed8;
+      }
+
+      .status {
+        min-height: 24px;
+        margin-top: 18px;
+        color: #14532d;
+        font-weight: 800;
+      }
+
+      .config {
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">NVOIP WEB SDK</p>
+      <h1>Demo real com backend local</h1>
+      <p>
+        Esta pagina chama os endpoints locais do exemplo Node. As credenciais ficam no servidor e o navegador recebe
+        apenas os canais habilitados.
+      </p>
+      <div class="actions">
+        <button id="open-default" type="button">Abrir fluxo padrao</button>
+        <button id="open-otp" class="secondary" type="button">Forcar OTP</button>
+        <button id="open-2fa" class="secondary" type="button">Forcar 2FA</button>
+      </div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div id="config" class="config">Carregando configuracao...</div>
+    </main>
+
+    <script src="/dist/nvoip-auth-widget.js?v=0.2.0"></script>
+    <script>
+      const status = document.getElementById("status");
+      const configBox = document.getElementById("config");
+      let serverConfig = { flow: "otp", channels: ["sms"] };
+
+      async function loadConfig() {
+        const response = await fetch("/api/nvoip/config");
+        serverConfig = await response.json();
+        configBox.textContent =
+          "Fluxo padrao: " + serverConfig.flow.toUpperCase() + " | Canais: " + serverConfig.channels.join(", ");
+      }
+
+      function openWidget(flow) {
+        NvoipAuthWidget.open({
+          flow: flow || serverConfig.flow,
+          channels: serverConfig.channels,
+          accountLabel: "Conta de teste Nvoip",
+          helpText: "Abrir documentacao",
+          helpHref: "https://nvoip.docs.apiary.io/",
+          closeOnSuccess: false,
+          async startVerification(payload) {
+            status.textContent = "";
+            const response = await fetch("/api/nvoip/auth/start", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+              throw new Error(result.error || "Erro ao iniciar verificacao.");
+            }
+            return result;
+          },
+          async confirmVerification(payload) {
+            const response = await fetch("/api/nvoip/auth/confirm", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+              throw new Error(result.error || "Erro ao validar codigo.");
+            }
+            return result;
+          },
+          onSuccess({ phone, channel, flow }) {
+            status.textContent = flow.toUpperCase() + " validado por " + channel + " para " + phone + ".";
+          },
+        });
+      }
+
+      document.getElementById("open-default").addEventListener("click", () => openWidget());
+      document.getElementById("open-otp").addEventListener("click", () => openWidget("otp"));
+      document.getElementById("open-2fa").addEventListener("click", () => openWidget("2fa"));
+      loadConfig().catch((error) => {
+        configBox.textContent = error.message;
+      });
+    </script>
+  </body>
+</html>
