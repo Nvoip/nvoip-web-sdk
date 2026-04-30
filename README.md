@@ -12,6 +12,12 @@ Esse repo entrega uma UI pronta para copiar e colar na aplicacao do cliente:
 - popup para digitar o codigo recebido
 - callbacks para integrar com o backend do cliente
 
+## Instalacao
+
+```bash
+npm install nvoip-web-sdk
+```
+
 ## Importante
 
 Nao exponha `napikey`, `user-token`, `client_secret` ou qualquer credencial da Nvoip no browser.

@@ -1,0 +1,38 @@
+{
+  "name": "nvoip-web-sdk",
+  "version": "0.1.0",
+  "description": "SDK Web oficial da Nvoip para embutir popup de telefone e codigo usando a API v2.",
+  "main": "dist/nvoip-auth-widget.js",
+  "browser": "dist/nvoip-auth-widget.js",
+  "style": "dist/nvoip-auth-widget.css",
+  "files": [
+    "dist",
+    "examples",
+    ".env.example",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "pack:check": "npm pack --dry-run",
+    "start": "node examples/server-node.mjs"
+  },
+  "keywords": [
+    "nvoip",
+    "web-sdk",
+    "otp",
+    "authentication",
+    "telefone",
+    "sms",
+    "api"
+  ],
+  "author": "Nvoip",
+  "license": "GPL-3.0-only",
+  "homepage": "https://www.nvoip.com.br/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nvoip/nvoip-web-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Nvoip/nvoip-web-sdk/issues"
+  }
+}
