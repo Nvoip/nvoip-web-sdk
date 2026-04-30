@@ -13,6 +13,7 @@ loadEnv(path.join(rootDir, ".env"));
 const baseUrl = process.env.NVOIP_BASE_URL || "https://api.nvoip.com.br/v2";
 const defaultFlow = normalizeFlow(process.env.NVOIP_VERIFY_FLOW || "otp");
 const allowedChannels = parseChannels(process.env.NVOIP_ALLOWED_CHANNELS || "sms");
+const exposeDemoPhone = process.env.NVOIP_EXPOSE_DEMO_PHONE === "true";
 const localCodeSessions = new Map();
 
 function loadEnv(filePath) {
@@ -367,7 +368,7 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, {
         flow: defaultFlow,
         channels: allowedChannels,
-        demoPhone: process.env.NVOIP_DEMO_PHONE || "",
+        demoPhone: exposeDemoPhone ? process.env.NVOIP_DEMO_PHONE || "" : "",
       });
       return;
     }

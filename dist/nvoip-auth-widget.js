@@ -2,9 +2,12 @@
   const defaults = {
     flow: "otp",
     channels: ["sms"],
-    eyebrow: "VALIDAÇÃO",
-    title: "Escolha um método de verificação",
-    subtitle: "A Nvoip enviará um código para confirmar o acesso.",
+    eyebrow: "",
+    title: "",
+    subtitle: "",
+    methodHeading: "",
+    codeTitle: "",
+    codeSubtitle: "",
     accountLabel: "Conta Nvoip",
     accountActionText: "Alterar telefone",
     helpText: "",
@@ -20,6 +23,31 @@
     resendButtonText: "Enviar novamente",
     backButtonText: "Voltar",
     closeOnSuccess: true,
+    redirectOnSuccess: false,
+    returnTo: "",
+    successMessage: "",
+    successRedirectDelay: 750,
+  };
+
+  const flowPresets = {
+    otp: {
+      eyebrow: "VALIDAÇÃO DE TELEFONE",
+      title: "Confirme seu telefone",
+      subtitle: "Escolha como receber o código para continuar.",
+      methodHeading: "Receber código por",
+      codeTitle: "Digite o código recebido",
+      codeSubtitle: "Informe o código enviado para confirmar o telefone.",
+      successMessage: "Telefone validado. Redirecionando...",
+    },
+    "2fa": {
+      eyebrow: "ACESSO SEGURO",
+      title: "Confirme que é você",
+      subtitle: "Esta etapa protege sua conta antes de concluir o login.",
+      methodHeading: "Escolha uma forma de verificação",
+      codeTitle: "Digite o código de segurança",
+      codeSubtitle: "Informe o código enviado para liberar o acesso.",
+      successMessage: "Acesso validado. Redirecionando...",
+    },
   };
 
   const channelPresets = {
@@ -45,8 +73,9 @@
 
   class Widget {
     constructor(options) {
-      this.options = { ...defaults, ...options };
-      this.flow = this.normalizeFlow(this.options.flow);
+      const requestedFlow = this.normalizeFlow((options || {}).flow || defaults.flow);
+      this.options = { ...defaults, ...flowPresets[requestedFlow], ...options, flow: requestedFlow };
+      this.flow = requestedFlow;
       this.methods = this.normalizeChannels(this.options.methods || this.options.channels);
       this.sessionId = null;
       this.phone = this.options.phone || "";
@@ -120,7 +149,7 @@
           <section class="nvoip-auth-card">
             <div class="nvoip-auth-card-head">
               <span class="nvoip-auth-flow">${this.escape(this.flow.toUpperCase())}</span>
-              <h3>Como você quer receber o código?</h3>
+              <h3>${this.escape(this.options.methodHeading)}</h3>
             </div>
             <div class="nvoip-auth-method-list">
               ${methods || '<div class="nvoip-auth-empty">Nenhum método habilitado.</div>'}
@@ -160,7 +189,7 @@
         <div class="nvoip-auth-shell compact">
           <aside class="nvoip-auth-side">
             <p class="nvoip-auth-eyebrow">${this.escape(this.flow.toUpperCase())}</p>
-            <h2 class="nvoip-auth-title">Digite o código recebido</h2>
+            <h2 class="nvoip-auth-title">${this.escape(this.options.codeTitle)}</h2>
             <p class="nvoip-auth-subtitle">${this.escape(this.formatCodeSubtitle(method))}</p>
             ${this.renderAccountPill()}
             ${this.renderHelpLink()}
@@ -230,9 +259,12 @@
             flow: this.flow,
           });
 
-          this.setMessage("Código validado com sucesso.", "success");
+          this.setMessage(this.options.successMessage || "Código validado com sucesso.", "success");
+          let shouldRedirect = Boolean(this.options.redirectOnSuccess);
+          const returnTo = this.resolveReturnTo();
+
           if (typeof this.options.onSuccess === "function") {
-            this.options.onSuccess({
+            const callbackResult = await this.options.onSuccess({
               phone: this.phone,
               code,
               sessionId: this.sessionId,
@@ -240,7 +272,19 @@
               method,
               flow: this.flow,
               result,
+              returnTo,
             });
+
+            if (callbackResult === false) {
+              shouldRedirect = false;
+            }
+          }
+
+          if (shouldRedirect && returnTo) {
+            window.setTimeout(() => {
+              window.location.assign(returnTo);
+            }, Number(this.options.successRedirectDelay) || 0);
+            return;
           }
 
           if (this.options.closeOnSuccess) {
@@ -278,6 +322,7 @@
           channel: method.id,
           method,
           flow: this.flow,
+          returnTo: this.resolveReturnTo(),
         });
         this.sessionId = result.sessionId || result.key || result.token2fa || null;
 
@@ -390,6 +435,17 @@
       return (this.phone || this.options.phone || "").trim();
     }
 
+    resolveReturnTo() {
+      const value = typeof this.options.returnTo === "function" ? this.options.returnTo(this) : this.options.returnTo;
+
+      if (value) {
+        return String(value);
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      return params.get("returnTo") || params.get("return_to") || params.get("redirect") || "";
+    }
+
     formatDescription(method) {
       const phone = this.readPhone() || this.phone || this.options.phone || "";
       const maskedPhone = this.options.maskedPhone || this.maskPhone(phone) || "informado";
@@ -400,6 +456,10 @@
     }
 
     formatCodeSubtitle(method) {
+      if (this.options.codeSubtitle) {
+        return this.options.codeSubtitle;
+      }
+
       if (method.id === "voice") {
         return "Aguarde a ligação e informe o código recebido.";
       }
@@ -498,11 +558,31 @@
     }
   }
 
+  function openReadyToUse(options, flow, defaultsForFlow) {
+    return window.NvoipAuthWidget.open({
+      flow,
+      closeOnSuccess: false,
+      redirectOnSuccess: true,
+      ...defaultsForFlow,
+      ...options,
+    });
+  }
+
   window.NvoipAuthWidget = {
     open(options) {
       const widget = new Widget(options);
       widget.open();
       return widget;
+    },
+    startOTP(options) {
+      return openReadyToUse(options, "otp", {
+        allowPhoneEdit: true,
+      });
+    },
+    start2FA(options) {
+      return openReadyToUse(options, "2fa", {
+        allowPhoneEdit: false,
+      });
     },
     mount(trigger, options) {
       trigger.addEventListener("click", () => {
