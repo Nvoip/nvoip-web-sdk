@@ -25,15 +25,33 @@
         font-weight: 700;
         cursor: pointer;
       }
+
+      .demo-shell {
+        display: grid;
+        gap: 18px;
+        justify-items: center;
+      }
+
+      .demo-status {
+        min-height: 24px;
+        color: #14532d;
+        font-weight: 700;
+      }
     </style>
   </head>
   <body>
-    <button id="demo-trigger">Abrir autenticacao</button>
+    <main class="demo-shell">
+      <button id="demo-trigger">Abrir autenticacao</button>
+      <div id="demo-status" class="demo-status" role="status" aria-live="polite"></div>
+    </main>
 
     <script src="../dist/nvoip-auth-widget.js"></script>
     <script>
+      const status = document.getElementById("demo-status");
+
       NvoipAuthWidget.mount(document.getElementById("demo-trigger"), {
         async startVerification({ phone }) {
+          status.textContent = "";
           console.log("Mock start", phone);
           return {
             sessionId: "mock-session-id",
@@ -51,7 +69,7 @@
           };
         },
         onSuccess({ phone }) {
-          alert("Telefone validado com sucesso: " + phone);
+          status.textContent = "Telefone validado com sucesso: " + phone;
         },
       });
     </script>
