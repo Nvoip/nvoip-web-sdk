@@ -2,21 +2,21 @@
   const defaults = {
     flow: "otp",
     channels: ["sms"],
-    eyebrow: "VALIDACAO",
-    title: "Escolha um metodo de verificacao",
-    subtitle: "A Nvoip enviara um codigo para confirmar o acesso.",
+    eyebrow: "VALIDAÇÃO",
+    title: "Escolha um método de verificação",
+    subtitle: "A Nvoip enviará um código para confirmar o acesso.",
     accountLabel: "Conta Nvoip",
     accountActionText: "Alterar telefone",
-    helpText: "Preciso de ajuda",
+    helpText: "",
     helpHref: "",
     phone: "",
     maskedPhone: "",
     allowPhoneEdit: true,
     phoneLabel: "Telefone",
     phonePlaceholder: "11999999999",
-    codeLabel: "Codigo de verificacao",
+    codeLabel: "Código de verificação",
     startButtonText: "Continuar",
-    confirmButtonText: "Validar codigo",
+    confirmButtonText: "Validar código",
     resendButtonText: "Enviar novamente",
     backButtonText: "Voltar",
     closeOnSuccess: true,
@@ -26,20 +26,17 @@
     sms: {
       id: "sms",
       label: "SMS",
-      icon: "SMS",
-      description: "Vamos enviar um codigo para o telefone {maskedPhone}.",
+      description: "Vamos enviar um código para o telefone {maskedPhone}.",
     },
     whatsapp: {
       id: "whatsapp",
       label: "WhatsApp",
-      icon: "WA",
-      description: "Vamos enviar um codigo pelo WhatsApp para o telefone {maskedPhone}.",
+      description: "Vamos enviar um código pelo WhatsApp para o telefone {maskedPhone}.",
     },
     voice: {
       id: "voice",
-      label: "Ligacao",
-      icon: "TEL",
-      description: "Vamos ligar para o telefone {maskedPhone} e informar o codigo.",
+      label: "Ligação",
+      description: "Vamos ligar para o telefone {maskedPhone} e informar o código.",
     },
   };
 
@@ -97,7 +94,7 @@
           const description = this.formatDescription(method);
           return `
             <button class="nvoip-auth-method" type="button" data-channel="${this.escape(method.id)}">
-              <span class="nvoip-auth-method-icon">${this.escape(method.icon || method.label.slice(0, 3))}</span>
+              <span class="nvoip-auth-method-icon">${this.renderMethodIcon(method)}</span>
               <span class="nvoip-auth-method-copy">
                 <strong>${this.escape(method.label)}</strong>
                 <span data-role="method-description" data-channel="${this.escape(method.id)}">${this.escape(
@@ -111,7 +108,7 @@
         .join("");
 
       this.modal.innerHTML = `
-        <button class="nvoip-auth-close" type="button" data-role="close" aria-label="Fechar">x</button>
+        <button class="nvoip-auth-close" type="button" data-role="close" aria-label="Fechar">×</button>
         <div class="nvoip-auth-shell">
           <aside class="nvoip-auth-side">
             <p class="nvoip-auth-eyebrow">${this.escape(this.options.eyebrow)}</p>
@@ -123,10 +120,10 @@
           <section class="nvoip-auth-card">
             <div class="nvoip-auth-card-head">
               <span class="nvoip-auth-flow">${this.escape(this.flow.toUpperCase())}</span>
-              <h3>Como voce quer receber o codigo?</h3>
+              <h3>Como você quer receber o código?</h3>
             </div>
             <div class="nvoip-auth-method-list">
-              ${methods || '<div class="nvoip-auth-empty">Nenhum metodo habilitado.</div>'}
+              ${methods || '<div class="nvoip-auth-empty">Nenhum método habilitado.</div>'}
             </div>
             <div class="nvoip-auth-message ${this.escape(type)}" role="status" aria-live="polite">${this.escape(
         message
@@ -159,18 +156,18 @@
     renderCodeStep(message = "") {
       const method = this.selectedMethod || this.methods[0];
       this.modal.innerHTML = `
-        <button class="nvoip-auth-close" type="button" data-role="close" aria-label="Fechar">x</button>
+        <button class="nvoip-auth-close" type="button" data-role="close" aria-label="Fechar">×</button>
         <div class="nvoip-auth-shell compact">
           <aside class="nvoip-auth-side">
             <p class="nvoip-auth-eyebrow">${this.escape(this.flow.toUpperCase())}</p>
-            <h2 class="nvoip-auth-title">Digite o codigo recebido</h2>
+            <h2 class="nvoip-auth-title">Digite o código recebido</h2>
             <p class="nvoip-auth-subtitle">${this.escape(this.formatCodeSubtitle(method))}</p>
             ${this.renderAccountPill()}
             ${this.renderHelpLink()}
           </aside>
           <section class="nvoip-auth-card">
             <div class="nvoip-auth-selected-method">
-              <span class="nvoip-auth-method-icon">${this.escape(method.icon || method.label.slice(0, 3))}</span>
+              <span class="nvoip-auth-method-icon">${this.renderMethodIcon(method)}</span>
               <span>
                 <strong>${this.escape(method.label)}</strong>
                 <small>${this.escape(this.formatDescription(method))}</small>
@@ -216,12 +213,12 @@
         const code = input.value.trim();
 
         if (!code) {
-          this.setMessage("Informe o codigo recebido.", "error");
+          this.setMessage("Informe o código recebido.", "error");
           return;
         }
 
         this.setConfirmLoading(true);
-        this.setMessage("Validando codigo...", "success");
+        this.setMessage("Validando código...", "success");
 
         try {
           const result = await this.options.confirmVerification({
@@ -233,7 +230,7 @@
             flow: this.flow,
           });
 
-          this.setMessage("Codigo validado com sucesso.", "success");
+          this.setMessage("Código validado com sucesso.", "success");
           if (typeof this.options.onSuccess === "function") {
             this.options.onSuccess({
               phone: this.phone,
@@ -253,7 +250,7 @@
           }
         } catch (error) {
           this.setConfirmLoading(false);
-          this.setMessage(error.message || "Nao foi possivel validar o codigo.", "error");
+          this.setMessage(error.message || "Não foi possível validar o código.", "error");
         }
       });
 
@@ -266,14 +263,14 @@
     async startSelectedMethod(method) {
       const phone = this.readPhone();
       if (!phone) {
-        this.renderMethodStep("Informe um telefone valido antes de escolher o metodo.", "error");
+        this.renderMethodStep("Informe um telefone válido antes de escolher o método.", "error");
         return;
       }
 
       this.phone = phone;
       this.selectedMethod = method;
       this.setMethodLoading(method.id, true);
-      this.setMessage("Enviando codigo...", "success");
+      this.setMessage("Enviando código...", "success");
 
       try {
         const result = await this.options.startVerification({
@@ -288,9 +285,9 @@
           throw new Error("The startVerification callback must return sessionId, key or token2fa.");
         }
 
-        this.renderCodeStep(result.message || "Codigo enviado com sucesso.");
+        this.renderCodeStep(result.message || "Código enviado com sucesso.");
       } catch (error) {
-        this.renderMethodStep(error.message || "Nao foi possivel iniciar a verificacao.", "error");
+        this.renderMethodStep(error.message || "Não foi possível iniciar a verificação.", "error");
       }
     }
 
@@ -404,10 +401,10 @@
 
     formatCodeSubtitle(method) {
       if (method.id === "voice") {
-        return "Aguarde a ligacao e informe o codigo recebido.";
+        return "Aguarde a ligação e informe o código recebido.";
       }
 
-      return "Informe abaixo o codigo enviado para continuar.";
+      return "Informe abaixo o código enviado para continuar.";
     }
 
     normalizeChannels(channels) {
@@ -420,9 +417,9 @@
           const id = this.normalizeChannelId(rawId);
           const preset = channelPresets[id] || {
             id,
-            label: id || "Metodo",
+            label: id || "Método",
             icon: (id || "M").slice(0, 3).toUpperCase(),
-            description: "Vamos enviar um codigo para o telefone {maskedPhone}.",
+            description: "Vamos enviar um código para o telefone {maskedPhone}.",
           };
 
           if (!id) {
@@ -450,6 +447,36 @@
       }
 
       return value;
+    }
+
+    renderMethodIcon(method) {
+      if (method.id === "sms") {
+        return `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17H9l-4.5 3v-3H5A1.5 1.5 0 0 1 3.5 15.5V7A1.5 1.5 0 0 1 5 5.5Z" />
+            <path d="M7.5 9h9M7.5 12h6" />
+          </svg>
+        `;
+      }
+
+      if (method.id === "whatsapp") {
+        return `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5.4 18.7 6.2 16A8 8 0 1 1 9 18.5l-3.6.2Z" />
+            <path d="M9.2 8.6c.2-.5.4-.5.8-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.3.1.5-.1.7l-.4.5c.6 1 1.4 1.8 2.6 2.3l.5-.6c.2-.2.4-.3.7-.2l1.7.8c.3.1.4.3.4.6v.4c0 .5-.3.9-.8 1.1-.6.3-1.4.3-2.5-.2-2.5-1-4.2-2.7-5.2-5.1-.4-1-.3-1.6.1-1.8Z" />
+          </svg>
+        `;
+      }
+
+      if (method.id === "voice") {
+        return `
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8.2 4.7 10 8.5 8.5 10c.9 1.9 2.3 3.3 4.2 4.2l1.5-1.5 3.8 1.8-.4 3.2c-.1.7-.7 1.3-1.4 1.3C10 19 5 14 5 7.8c0-.7.5-1.3 1.3-1.4l1.9-.7Z" />
+          </svg>
+        `;
+      }
+
+      return this.escape(method.icon || method.label.slice(0, 3));
     }
 
     maskPhone(phone) {

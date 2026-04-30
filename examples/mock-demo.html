@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nvoip Auth Widget Demo</title>
-    <link rel="stylesheet" href="../dist/nvoip-auth-widget.css?v=0.2.0" />
+    <link rel="stylesheet" href="../dist/nvoip-auth-widget.css?v=0.2.2" />
     <style>
       body {
         margin: 0;
@@ -16,7 +16,7 @@
           radial-gradient(circle at 82% 14%, rgba(255, 131, 0, 0.18), transparent 24%),
           linear-gradient(135deg, #f8fafc 0%, #fff7ed 100%);
         color: #0f172a;
-        font-family: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
+        font-family: "Manrope", "Aptos", "Segoe UI", sans-serif;
       }
 
       .demo-shell {
@@ -112,7 +112,7 @@
         <p>NVOIP WEB SDK</p>
         <h1>Validacao pronta para copiar e colar.</h1>
         <p>
-          O desenvolvedor escolhe quais canais aparecem no front. Esta demo habilita WhatsApp, SMS e ligacao para
+          O desenvolvedor escolhe quais canais aparecem no front. Esta demo habilita WhatsApp, SMS e ligação para
           OTP e 2FA.
         </p>
       </section>
@@ -127,7 +127,7 @@
       </section>
     </main>
 
-    <script src="../dist/nvoip-auth-widget.js?v=0.2.0"></script>
+    <script src="../dist/nvoip-auth-widget.js?v=0.2.2"></script>
     <script>
       const status = document.getElementById("demo-status");
 
@@ -138,20 +138,19 @@
           accountLabel: "cliente.demo@nvoip.com.br",
           phone: "11999991740",
           closeOnSuccess: false,
-          helpText: "Ver documentacao da API",
-          helpHref: "https://nvoip.docs.apiary.io/",
+          helpText: "",
           async startVerification({ phone, channel, flow }) {
             status.textContent = "";
             console.log("Mock start", { phone, channel, flow });
             return {
               sessionId: "mock-" + flow + "-" + channel,
-              message: "Codigo mock enviado por " + channel + ".",
+              message: "Código mock enviado por " + channel + ".",
             };
           },
           async confirmVerification({ sessionId, code, phone, channel, flow }) {
             console.log("Mock confirm", { sessionId, code, phone, channel, flow });
             if (code !== "123456") {
-              throw new Error("Codigo invalido. Use 123456 no mock.");
+              throw new Error("Código inválido. Use 123456 no mock.");
             }
 
             return { status: "ok" };

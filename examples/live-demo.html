@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nvoip Auth Widget Live Demo</title>
-    <link rel="stylesheet" href="/dist/nvoip-auth-widget.css?v=0.2.0" />
+    <link rel="stylesheet" href="/dist/nvoip-auth-widget.css?v=0.2.2" />
     <style>
       body {
         margin: 0;
@@ -12,10 +12,11 @@
         display: grid;
         place-items: center;
         background:
-          radial-gradient(circle at 18% 20%, rgba(0, 163, 224, 0.2), transparent 30%),
+          radial-gradient(circle at 15% 16%, rgba(0, 163, 224, 0.18), transparent 30%),
+          radial-gradient(circle at 86% 10%, rgba(255, 131, 0, 0.15), transparent 24%),
           linear-gradient(140deg, #f8fafc 0%, #fff7ed 100%);
-        color: #0f172a;
-        font-family: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
+        color: #17181c;
+        font-family: "Manrope", "Aptos", "Segoe UI", sans-serif;
       }
 
       main {
@@ -24,21 +25,22 @@
         border: 1px solid rgba(148, 163, 184, 0.28);
         border-radius: 28px;
         background: rgba(255, 255, 255, 0.86);
-        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+        box-shadow: 0 26px 78px rgba(15, 23, 42, 0.12);
       }
 
       .eyebrow {
         margin: 0 0 12px;
         color: #2563eb;
         font-size: 13px;
-        font-weight: 900;
+        font-weight: 800;
         letter-spacing: 0.12em;
       }
 
       h1 {
         margin: 0;
-        font-size: clamp(32px, 5vw, 56px);
-        letter-spacing: -0.06em;
+        font-size: clamp(32px, 5vw, 54px);
+        font-weight: 760;
+        letter-spacing: -0.045em;
         line-height: 1;
       }
 
@@ -62,7 +64,7 @@
         background: #ff8300;
         color: #fff;
         font-size: 15px;
-        font-weight: 850;
+        font-weight: 760;
         cursor: pointer;
       }
 
@@ -93,19 +95,19 @@
       <p class="eyebrow">NVOIP WEB SDK</p>
       <h1>Demo real com backend local</h1>
       <p>
-        Esta pagina chama os endpoints locais do exemplo Node. As credenciais ficam no servidor e o navegador recebe
+        Esta página chama os endpoints locais do exemplo Node. As credenciais ficam no servidor e o navegador recebe
         apenas os canais habilitados.
       </p>
       <div class="actions">
-        <button id="open-default" type="button">Abrir fluxo padrao</button>
-        <button id="open-otp" class="secondary" type="button">Forcar OTP</button>
-        <button id="open-2fa" class="secondary" type="button">Forcar 2FA</button>
+        <button id="open-default" type="button">Abrir fluxo padrão</button>
+        <button id="open-otp" class="secondary" type="button">Forçar OTP</button>
+        <button id="open-2fa" class="secondary" type="button">Forçar 2FA</button>
       </div>
       <div id="status" class="status" role="status" aria-live="polite"></div>
       <div id="config" class="config">Carregando configuracao...</div>
     </main>
 
-    <script src="/dist/nvoip-auth-widget.js?v=0.2.0"></script>
+    <script src="/dist/nvoip-auth-widget.js?v=0.2.2"></script>
     <script>
       const status = document.getElementById("status");
       const configBox = document.getElementById("config");
@@ -115,7 +117,7 @@
         const response = await fetch("/api/nvoip/config");
         serverConfig = await response.json();
         configBox.textContent =
-          "Fluxo padrao: " + serverConfig.flow.toUpperCase() + " | Canais: " + serverConfig.channels.join(", ");
+          "Fluxo padrão: " + serverConfig.flow.toUpperCase() + " | Canais: " + serverConfig.channels.join(", ");
       }
 
       function openWidget(flow) {
@@ -123,9 +125,9 @@
           flow: flow || serverConfig.flow,
           channels: serverConfig.channels,
           accountLabel: "Conta de teste Nvoip",
-          helpText: "Abrir documentacao",
-          helpHref: "https://nvoip.docs.apiary.io/",
+          helpText: "",
           closeOnSuccess: false,
+          phone: serverConfig.demoPhone || "",
           async startVerification(payload) {
             status.textContent = "";
             const response = await fetch("/api/nvoip/auth/start", {
@@ -135,7 +137,7 @@
             });
             const result = await response.json();
             if (!response.ok) {
-              throw new Error(result.error || "Erro ao iniciar verificacao.");
+              throw new Error(result.error || "Erro ao iniciar verificação.");
             }
             return result;
           },
@@ -147,7 +149,7 @@
             });
             const result = await response.json();
             if (!response.ok) {
-              throw new Error(result.error || "Erro ao validar codigo.");
+              throw new Error(result.error || "Erro ao validar código.");
             }
             return result;
           },

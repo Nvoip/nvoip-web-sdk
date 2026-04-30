@@ -6,24 +6,24 @@
   justify-content: center;
   padding: 28px;
   background:
-    radial-gradient(circle at 18% 12%, rgba(0, 163, 224, 0.18), transparent 32%),
-    radial-gradient(circle at 82% 8%, rgba(255, 131, 0, 0.14), transparent 28%),
-    rgba(15, 23, 42, 0.48);
-  backdrop-filter: blur(10px);
+    radial-gradient(circle at 12% 18%, rgba(0, 163, 224, 0.18), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(255, 131, 0, 0.12), transparent 30%),
+    rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(12px);
   z-index: 9999;
 }
 
 .nvoip-auth-modal {
   position: relative;
-  width: min(940px, 100%);
-  max-height: min(760px, calc(100vh - 32px));
+  width: min(1040px, 100%);
+  max-height: min(820px, calc(100vh - 32px));
   overflow: auto;
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 32px;
   background: #ffffff;
-  color: #111827;
-  box-shadow: 0 28px 90px rgba(15, 23, 42, 0.28);
-  font-family: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
+  color: #17181c;
+  box-shadow: 0 32px 100px rgba(15, 23, 42, 0.26);
+  font-family: var(--nvoip-auth-font-family, "Manrope", "Aptos", "Segoe UI", sans-serif);
 }
 
 .nvoip-auth-close {
@@ -40,8 +40,9 @@
   background: #f8fafc;
   color: #64748b;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .nvoip-auth-close:hover {
@@ -51,55 +52,55 @@
 
 .nvoip-auth-shell {
   display: grid;
-  grid-template-columns: 0.92fr 1.08fr;
-  min-height: 560px;
+  grid-template-columns: 0.9fr 1.1fr;
+  min-height: 620px;
 }
 
 .nvoip-auth-shell.compact {
-  min-height: 500px;
+  min-height: 560px;
 }
 
 .nvoip-auth-side {
   display: flex;
   flex-direction: column;
-  padding: 54px 42px 38px;
+  padding: 64px 52px 44px;
   background:
-    linear-gradient(145deg, rgba(239, 246, 255, 0.92) 0%, rgba(255, 247, 237, 0.66) 100%),
-    #f8fafc;
+    radial-gradient(circle at 16% 16%, rgba(0, 163, 224, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 247, 237, 0.76) 100%);
 }
 
 .nvoip-auth-eyebrow {
-  margin: 0 0 12px;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 0.11em;
+  margin: 0 0 14px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
 }
 
 .nvoip-auth-title {
   margin: 0;
   max-width: 420px;
-  font-size: clamp(30px, 4vw, 48px);
-  font-weight: 850;
-  letter-spacing: -0.05em;
-  line-height: 1.07;
+  font-size: clamp(34px, 4.3vw, 54px);
+  font-weight: 760;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
 }
 
 .nvoip-auth-subtitle {
-  margin: 16px 0 0;
+  margin: 18px 0 0;
   max-width: 360px;
   color: #475569;
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.58;
 }
 
 .nvoip-auth-phone-box {
   margin-top: 34px;
-  padding: 18px;
+  padding: 16px;
   border: 1px solid #dbeafe;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: 0 14px 38px rgba(37, 99, 235, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 16px 46px rgba(37, 99, 235, 0.07);
 }
 
 .nvoip-auth-account {
@@ -163,7 +164,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 54px 52px 44px;
+  padding: 62px 62px 48px;
   background: #ffffff;
 }
 
@@ -178,8 +179,8 @@
   margin-bottom: 10px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #eef6ff;
+  color: #1f73d8;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.1em;
@@ -187,38 +188,44 @@
 
 .nvoip-auth-card h3 {
   margin: 0;
-  color: #111827;
-  font-size: 22px;
-  font-weight: 850;
+  color: #17181c;
+  font-size: 24px;
+  font-weight: 760;
   letter-spacing: -0.025em;
 }
 
 .nvoip-auth-method-list {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .nvoip-auth-method {
   display: grid;
-  grid-template-columns: 66px 1fr 24px;
+  grid-template-columns: 70px 1fr 24px;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  padding: 18px 14px;
+  padding: 18px 16px;
   border: 1px solid transparent;
-  border-radius: 22px;
+  border-radius: 24px;
   background: #ffffff;
-  color: #111827;
+  color: #17181c;
   cursor: pointer;
   text-align: left;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .nvoip-auth-method:hover,
 .nvoip-auth-method:focus-visible {
-  border-color: #bfdbfe;
+  border-color: #c7dcff;
   background: #f8fbff;
-  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 18px 46px rgba(37, 99, 235, 0.1);
   outline: none;
+  transform: translateY(-1px);
 }
 
 .nvoip-auth-method:disabled {
@@ -232,15 +239,22 @@
 
 .nvoip-auth-method-icon {
   display: grid;
-  width: 58px;
-  height: 58px;
+  width: 60px;
+  height: 60px;
   place-items: center;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #3b82f6;
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: -0.04em;
+  background: #eef5ff;
+  color: #2f73ff;
+}
+
+.nvoip-auth-method-icon svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.85;
 }
 
 .nvoip-auth-method-copy strong,
@@ -250,15 +264,16 @@
 
 .nvoip-auth-method-copy strong {
   margin-bottom: 6px;
-  font-size: 18px;
-  font-weight: 850;
+  font-size: 19px;
+  font-weight: 740;
+  letter-spacing: -0.015em;
 }
 
 .nvoip-auth-method-copy span,
 .nvoip-auth-selected-method small {
   color: #475569;
-  font-size: 15px;
-  line-height: 1.38;
+  font-size: 15.5px;
+  line-height: 1.43;
 }
 
 .nvoip-auth-chevron {
@@ -282,8 +297,8 @@
   margin-bottom: 24px;
   padding: 16px;
   border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  background: #f8fafc;
+  border-radius: 24px;
+  background: #f8fbff;
 }
 
 .nvoip-auth-selected-method strong,
@@ -293,7 +308,8 @@
 
 .nvoip-auth-selected-method strong {
   margin-bottom: 4px;
-  font-size: 17px;
+  font-size: 18px;
+  font-weight: 740;
 }
 
 .nvoip-auth-label {
@@ -301,7 +317,7 @@
   margin-bottom: 8px;
   color: #334155;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 740;
 }
 
 .nvoip-auth-input {
@@ -309,7 +325,7 @@
   box-sizing: border-box;
   padding: 13px 15px;
   border: 1px solid #cbd5e1;
-  border-radius: 14px;
+  border-radius: 16px;
   background: #ffffff;
   color: #111827;
   font: inherit;
@@ -318,7 +334,7 @@
 
 .nvoip-auth-input.code {
   font-size: 24px;
-  font-weight: 850;
+  font-weight: 760;
   letter-spacing: 0.18em;
   text-align: center;
 }
@@ -356,7 +372,7 @@
   border-radius: 14px;
   font: inherit;
   font-size: 15px;
-  font-weight: 850;
+  font-weight: 760;
   cursor: pointer;
 }
 
@@ -380,7 +396,7 @@
 }
 
 .nvoip-auth-button.secondary {
-  background: #eff6ff;
+  background: #eef6ff;
   color: #1d4ed8;
 }
 
@@ -409,10 +425,11 @@
 @media (max-width: 760px) {
   .nvoip-auth-overlay {
     align-items: flex-start;
-    padding: 16px;
+    padding: 10px;
   }
 
   .nvoip-auth-modal {
+    max-height: calc(100vh - 20px);
     border-radius: 22px;
   }
 
@@ -423,35 +440,61 @@
 
   .nvoip-auth-side,
   .nvoip-auth-card {
-    padding: 30px 22px;
+    padding: 24px 24px;
   }
 
   .nvoip-auth-title {
-    font-size: 31px;
+    font-size: 30px;
+    line-height: 1.06;
+  }
+
+  .nvoip-auth-subtitle {
+    margin-top: 12px;
+    font-size: 15px;
+  }
+
+  .nvoip-auth-phone-box,
+  .nvoip-auth-account {
+    margin-top: 22px;
   }
 
   .nvoip-auth-help {
-    margin-top: 24px;
+    margin-top: 18px;
+  }
+
+  .nvoip-auth-card-head {
+    margin-bottom: 10px;
+  }
+
+  .nvoip-auth-card h3 {
+    font-size: 23px;
   }
 
   .nvoip-auth-method {
-    grid-template-columns: 54px 1fr 18px;
+    grid-template-columns: 52px 1fr 18px;
     gap: 10px;
-    padding: 14px 8px;
+    padding: 11px 8px;
+    border-radius: 18px;
   }
 
   .nvoip-auth-method-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 12px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .nvoip-auth-method-icon svg {
+    width: 22px;
+    height: 22px;
   }
 
   .nvoip-auth-method-copy strong {
     font-size: 16px;
+    margin-bottom: 3px;
   }
 
   .nvoip-auth-method-copy span,
   .nvoip-auth-selected-method small {
     font-size: 13px;
+    line-height: 1.28;
   }
 }

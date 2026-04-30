@@ -1,6 +1,6 @@
 {
   "name": "nvoip-web-sdk",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "SDK Web oficial da Nvoip para embutir OTP e 2FA por SMS, WhatsApp e ligacao usando a API v2.",
   "main": "dist/nvoip-auth-widget.js",
   "browser": "dist/nvoip-auth-widget.js",

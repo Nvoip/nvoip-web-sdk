@@ -149,12 +149,15 @@ async function sendOtp(phone, channel) {
 
   const sessionId = payload.key;
   if (!sessionId) {
-    throw new Error("A API /otp nao retornou a chave de validacao.");
+    throw new Error("A API /otp não retornou a chave de validação.");
   }
 
   return {
     sessionId,
-    message: channel === "voice" ? "Ligacao enviada com o codigo." : "SMS enviado com o codigo.",
+    message:
+      channel === "voice"
+        ? "Ligação solicitada. Pode levar alguns segundos para tocar."
+        : "SMS enviado com o código.",
     provider: payload,
   };
 }
@@ -191,12 +194,12 @@ async function send2faSms(phone) {
 
   const sessionId = payload.token2fa || payload["2fa-token"] || payload.key;
   if (!sessionId) {
-    throw new Error("A API /2fa nao retornou token2fa.");
+    throw new Error("A API /2fa não retornou token2fa.");
   }
 
   return {
     sessionId,
-    message: "Codigo 2FA enviado por SMS.",
+    message: "Código 2FA enviado por SMS.",
     provider: payload,
   };
 }
@@ -228,7 +231,7 @@ async function sendWhatsappCode(phone, flow) {
   const language = process.env.NVOIP_WHATSAPP_LANGUAGE || "pt_BR";
 
   if (!templateId || !instance) {
-    throw new Error("Configure NVOIP_WHATSAPP_TEMPLATE_ID and NVOIP_WHATSAPP_INSTANCE.");
+    throw new Error("WhatsApp exige um template aprovado. Configure NVOIP_WHATSAPP_TEMPLATE_ID e NVOIP_WHATSAPP_INSTANCE.");
   }
 
   const code = crypto.randomInt(0, 1000000).toString().padStart(6, "0");
@@ -265,7 +268,7 @@ async function sendWhatsappCode(phone, flow) {
 
   return {
     sessionId,
-    message: "Codigo enviado por WhatsApp.",
+    message: "Código enviado por WhatsApp.",
     provider: payload,
   };
 }
@@ -274,11 +277,11 @@ function checkLocalCode(code, sessionId) {
   const session = localCodeSessions.get(sessionId);
   if (!session || session.expiresAt < Date.now()) {
     localCodeSessions.delete(sessionId);
-    throw new Error("Codigo expirado ou sessao invalida.");
+    throw new Error("Código expirado ou sessão inválida.");
   }
 
   if (session.code !== code) {
-    throw new Error("Codigo invalido.");
+    throw new Error("Código inválido.");
   }
 
   localCodeSessions.delete(sessionId);
@@ -294,7 +297,7 @@ async function startVerification({ phone, channel, flow }) {
   }
 
   if (!allowedChannels.includes(selectedChannel)) {
-    throw new Error(`Canal nao habilitado neste backend: ${selectedChannel}.`);
+    throw new Error(`Canal não habilitado neste backend: ${selectedChannel}.`);
   }
 
   if (selectedChannel === "whatsapp") {
@@ -313,7 +316,7 @@ async function confirmVerification({ sessionId, code, channel, flow }) {
   const selectedFlow = normalizeFlow(flow || defaultFlow);
 
   if (!sessionId || !code) {
-    throw new Error("Informe sessionId e codigo.");
+    throw new Error("Informe sessionId e código.");
   }
 
   if (selectedChannel === "whatsapp" || localCodeSessions.has(sessionId)) {
@@ -364,6 +367,7 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, {
         flow: defaultFlow,
         channels: allowedChannels,
+        demoPhone: process.env.NVOIP_DEMO_PHONE || "",
       });
       return;
     }
