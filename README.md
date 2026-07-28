@@ -204,6 +204,10 @@ Notas de integração:
 - `sms` em `2fa` usa `/2fa` e `/check/2fa`, portanto precisa de `NVOIP_NAPIKEY`.
 - `whatsapp` no exemplo usa `/wa/sendTemplates`; o backend gera o código, envia em um template aprovado e valida o código localmente.
 - O template de WhatsApp precisa estar aprovado e aceitar uma variável de corpo para o código.
+- Este SDK valida posse de telefone e, por isso, mantém `destination` como número
+  telefônico. Não use BSUID neste campo. Templates de autenticação por BSUID
+  podem ser recusados pela Meta com o erro 131062
+  (`WHATSAPP_BSUID_AUTH_TEMPLATE_UNSUPPORTED`).
 
 ## Arquivos principais
 
