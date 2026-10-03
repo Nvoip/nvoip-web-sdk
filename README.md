@@ -1,8 +1,8 @@
 # nvoip-web-sdk
 
-[![CI](https://github.com/Nvoip/nvoip-web-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/Nvoip/nvoip-web-sdk/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/nvoip-web-sdk?style=flat-square)](https://www.npmjs.com/package/nvoip-web-sdk) [![npm downloads](https://img.shields.io/npm/dm/nvoip-web-sdk?style=flat-square)](https://www.npmjs.com/package/nvoip-web-sdk) [![Nvoip](https://img.shields.io/badge/Nvoip-site-00A3E0?style=flat-square)](https://www.nvoip.com.br/) [![API v2](https://img.shields.io/badge/API-v2-1F6FEB?style=flat-square)](https://www.nvoip.com.br/api/) [![Docs](https://img.shields.io/badge/docs-Apiary-6A737D?style=flat-square)](https://nvoip.docs.apiary.io/) [![Postman](https://img.shields.io/badge/Postman-workspace-FF6C37?style=flat-square)](https://nvoip-api.postman.co/workspace/e671d01f-168a-4c38-8d0e-c217229dd61a/team-quickstart) [![Stack](https://img.shields.io/badge/stack-JavaScript-F7DF1E?style=flat-square)](https://github.com/Nvoip/nvoip-api-examples) [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
+[![CI](https://github.com/Nvoip/nvoip-web-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/Nvoip/nvoip-web-sdk/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/nvoip-web-sdk?style=flat-square)](https://www.npmjs.com/package/nvoip-web-sdk) [![npm downloads](https://img.shields.io/npm/dm/nvoip-web-sdk?style=flat-square)](https://www.npmjs.com/package/nvoip-web-sdk) [![Nvoip](https://img.shields.io/badge/Nvoip-site-00A3E0?style=flat-square)](https://www.nvoip.com.br/) [![API v3](https://img.shields.io/badge/API-v3-1F6FEB?style=flat-square)](https://www.nvoip.com.br/api/) [![Docs](https://img.shields.io/badge/docs-OpenAPI-6A737D?style=flat-square)](https://github.com/Nvoip/nvoip-api-v3/blob/main/docs/openapi/README.md) [![Postman](https://img.shields.io/badge/Postman-workspace-FF6C37?style=flat-square)](https://nvoip-api.postman.co/workspace/e671d01f-168a-4c38-8d0e-c217229dd61a/team-quickstart) [![Stack](https://img.shields.io/badge/stack-JavaScript-F7DF1E?style=flat-square)](https://github.com/Nvoip/nvoip-api-examples) [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-SDK web oficial da [Nvoip](https://www.nvoip.com.br/) para embutir validação OTP e 2FA por SMS, WhatsApp ou ligação usando a API v2.
+SDK web oficial da [Nvoip](https://www.nvoip.com.br/) para embutir validação OTP e 2FA por SMS, WhatsApp ou ligação usando a API v3.
 
 ## Objetivo
 
@@ -175,17 +175,14 @@ Teste isolado do OAuth:
 npm run oauth:test
 ```
 
-O script confirma o OAuth e mascara `access_token` e `refresh_token` por padrão. Use `PRINT_ACCESS_TOKEN=1 npm run oauth:test` apenas em ambiente local se precisar ver o token bruto.
+O script confirma a emissão OAuth sem imprimir credenciais ou tokens. O exemplo de servidor lê `.env`; para executar o teste OAuth, exporte as variáveis ou use `node --env-file=.env examples/oauth-token.mjs`.
 
 Variáveis principais:
 
 ```env
-NVOIP_BASE_URL=https://api.nvoip.com.br/v2
-NVOIP_NUMBERSIP=
-NVOIP_USER_TOKEN=
+NVOIP_BASE_URL=https://api.nvoip.com.br/v3
 NVOIP_OAUTH_CLIENT_ID=
 NVOIP_OAUTH_CLIENT_SECRET=
-NVOIP_NAPIKEY=
 NVOIP_VERIFY_FLOW=otp
 NVOIP_ALLOWED_CHANNELS=sms,voice
 NVOIP_DEMO_PHONE=
@@ -201,7 +198,6 @@ Notas de integração:
 
 - `sms` em `otp` usa `/otp` com `phoneNumber`, `methods.sms=true` e `/check/otp`.
 - `voice` usa `/otp` com `phoneNumber`, `methods.torpedo=true` e `/check/otp`.
-- `sms` em `2fa` usa `/2fa` e `/check/2fa`, portanto precisa de `NVOIP_NAPIKEY`.
 - `whatsapp` no exemplo usa `/wa/sendTemplates`; o backend gera o código, envia em um template aprovado e valida o código localmente.
 - O template de WhatsApp precisa estar aprovado e aceitar uma variável de corpo para o código.
 - Este SDK valida posse de telefone e, por isso, mantém `destination` como número
@@ -220,7 +216,13 @@ Notas de integração:
 ## Links oficiais
 
 - [Site da Nvoip](https://www.nvoip.com.br/)
-- [Documentação da API](https://nvoip.docs.apiary.io/)
+- [Documentação da API](https://github.com/Nvoip/nvoip-api-v3/blob/main/docs/openapi/README.md)
 - [Página da API](https://www.nvoip.com.br/api/)
 - [Workspace Postman](https://nvoip-api.postman.co/workspace/e671d01f-168a-4c38-8d0e-c217229dd61a/team-quickstart)
 - [Hub de exemplos](https://github.com/Nvoip/nvoip-api-examples)
+
+## Migração para a v3
+
+A URL base é `https://api.nvoip.com.br/v3`. Emita o token no backend em `https://api.nvoip.com.br/auth/oauth2/token`, com formulário `grant_type=client_credentials`, `client_id` e `client_secret`, e use `Authorization: Bearer`. O token do usuário e a napikey antigos não autenticam a v3. `client_credentials` pode não emitir refresh token; renove pela mesma emissão quando expirar. A chave com escopos depende do NN-5543 e não é apresentada como disponível aqui.
+
+[Guia de migração v2 → v3](https://github.com/Nvoip/nvoip-api-examples/blob/main/docs/migration-v2-v3.md).

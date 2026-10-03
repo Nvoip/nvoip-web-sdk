@@ -17,4 +17,5 @@ jobs:
           node-version: "20"
       - run: node --check dist/nvoip-auth-widget.js
       - run: node --check examples/server-node.mjs
+      - run: npm test
       - run: npm pack --dry-run
