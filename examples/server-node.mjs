@@ -1,3 +1,4 @@
+import { createAccessToken } from "./oauth-client.mjs";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
@@ -10,7 +11,7 @@ const rootDir = path.resolve(__dirname, "..");
 
 loadEnv(path.join(rootDir, ".env"));
 
-const baseUrl = process.env.NVOIP_BASE_URL || "https://api.nvoip.com.br/v2";
+const baseUrl = process.env.NVOIP_BASE_URL || "https://api.nvoip.com.br/v3";
 const defaultFlow = normalizeFlow(process.env.NVOIP_VERIFY_FLOW || "otp");
 const allowedChannels = parseChannels(process.env.NVOIP_ALLOWED_CHANNELS || "sms");
 const exposeDemoPhone = process.env.NVOIP_EXPOSE_DEMO_PHONE === "true";
@@ -88,47 +89,8 @@ async function parseJsonResponse(response) {
   }
 }
 
-function encodeBasicAuth(clientId, clientSecret) {
-  return Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-}
-
-async function createAccessToken() {
-  const clientId = process.env.NVOIP_OAUTH_CLIENT_ID || "";
-  const clientSecret = process.env.NVOIP_OAUTH_CLIENT_SECRET || "";
-  const numbersip = process.env.NVOIP_NUMBERSIP || "";
-  const userToken = process.env.NVOIP_USER_TOKEN || "";
-
-  if (!clientId || !clientSecret || !numbersip || !userToken) {
-    throw new Error(
-      "Configure NVOIP_OAUTH_CLIENT_ID, NVOIP_OAUTH_CLIENT_SECRET, NVOIP_NUMBERSIP and NVOIP_USER_TOKEN.",
-    );
-  }
-
-  const body = new URLSearchParams({
-    username: numbersip,
-    password: userToken,
-    grant_type: "password",
-  });
-
-  const response = await fetch(`${baseUrl}/oauth/token`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${encodeBasicAuth(clientId, clientSecret)}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body,
-  });
-
-  const payload = await parseJsonResponse(response);
-  if (!response.ok) {
-    throw new Error(JSON.stringify(payload));
-  }
-
-  return payload.access_token;
-}
-
 async function sendOtp(phone, channel) {
-  const accessToken = await createAccessToken();
+  const bearer = await createAccessToken();
   const apiMethod = channel === "voice" ? "torpedo" : channel;
   const body = {
     phoneNumber: phone,
@@ -137,7 +99,7 @@ async function sendOtp(phone, channel) {
   const response = await fetch(`${baseUrl}/otp`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${bearer}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
@@ -145,7 +107,7 @@ async function sendOtp(phone, channel) {
 
   const payload = await parseJsonResponse(response);
   if (!response.ok) {
-    throw new Error(JSON.stringify(payload));
+    throw new Error(`Nvoip API failed (HTTP ${response.status}).`);
   }
 
   const sessionId = payload.key;
@@ -166,31 +128,31 @@ async function sendOtp(phone, channel) {
 async function checkOtp(code, key) {
   const response = await fetch(
     `${baseUrl}/check/otp?code=${encodeURIComponent(code)}&key=${encodeURIComponent(key)}`,
-    { method: "GET" },
+    { method: "GET", headers: { Authorization: `Bearer ${await createAccessToken()}` } },
   );
 
   const payload = await parseJsonResponse(response);
   if (!response.ok) {
-    throw new Error(JSON.stringify(payload));
+    throw new Error(`Nvoip API failed (HTTP ${response.status}).`);
   }
 
   return payload;
 }
 
 async function send2faSms(phone) {
-  const accessToken = await createAccessToken();
+  const bearer = await createAccessToken();
   const response = await fetch(`${baseUrl}/2fa`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${bearer}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ cellPhone: phone }),
+    body: JSON.stringify({ cellPhone: phone, methods: { sms: true } }),
   });
 
   const payload = await parseJsonResponse(response);
   if (!response.ok) {
-    throw new Error(JSON.stringify(payload));
+    throw new Error(`Nvoip API failed (HTTP ${response.status}).`);
   }
 
   const sessionId = payload.token2fa || payload["2fa-token"] || payload.key;
@@ -206,21 +168,15 @@ async function send2faSms(phone) {
 }
 
 async function check2fa(code, token2fa) {
-  const napikey = process.env.NVOIP_NAPIKEY || "";
-  if (!napikey) {
-    throw new Error("Configure NVOIP_NAPIKEY to validate the /check/2fa endpoint.");
-  }
-
+  const bearer = await createAccessToken();
   const response = await fetch(
-    `${baseUrl}/check/2fa?token2fa=${encodeURIComponent(token2fa)}&pin=${encodeURIComponent(
-      code,
-    )}&napikey=${encodeURIComponent(napikey)}`,
-    { method: "GET" },
+    `${baseUrl}/check/2fa?${new URLSearchParams({ token2fa, pin: code })}`,
+    { method: "GET", headers: { Authorization: `Bearer ${bearer}` } },
   );
 
   const payload = await parseJsonResponse(response);
   if (!response.ok) {
-    throw new Error(JSON.stringify(payload));
+    throw new Error(`Nvoip API failed (HTTP ${response.status}).`);
   }
 
   return payload;
@@ -236,11 +192,11 @@ async function sendWhatsappCode(phone, flow) {
   }
 
   const code = crypto.randomInt(0, 1000000).toString().padStart(6, "0");
-  const accessToken = await createAccessToken();
+  const bearer = await createAccessToken();
   const response = await fetch(`${baseUrl}/wa/sendTemplates`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${bearer}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -255,7 +211,7 @@ async function sendWhatsappCode(phone, flow) {
 
   const payload = await parseJsonResponse(response);
   if (!response.ok) {
-    throw new Error(JSON.stringify(payload));
+    throw new Error(`Nvoip API failed (HTTP ${response.status}).`);
   }
 
   const sessionId = crypto.randomUUID();
@@ -360,7 +316,7 @@ function serveStatic(res, pathname) {
   res.end(fs.readFileSync(filePath));
 }
 
-const server = http.createServer(async (req, res) => {
+export const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || "/", "http://localhost");
 
   try {
@@ -396,9 +352,12 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-const port = Number(process.env.PORT || 3333);
-const host = process.env.HOST || "127.0.0.1";
-server.listen(port, host, () => {
-  console.log(`Nvoip web SDK sample server listening on http://${host}:${port}`);
-  console.log(`Enabled flow: ${defaultFlow}. Enabled channels: ${allowedChannels.join(", ")}`);
-});
+export { startVerification, confirmVerification };
+
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  const port = Number(process.env.PORT || 3333);
+  const host = process.env.HOST || "localhost";
+  server.listen(port, host, () => {
+    console.log(`Nvoip web SDK sample server listening on http://${host}:${port}`);
+  });
+}
