@@ -135,6 +135,27 @@ Use quando o usuário precisa validar um telefone antes de continuar em cadastro
 </script>
 ```
 
+### Redirecionamento seguro
+
+`returnTo` aceita somente uma rota HTTP/HTTPS da mesma origem da página que
+carregou o SDK. Valores como `javascript:`, URLs de outro domínio e URLs com
+credenciais são recusados e o widget não redireciona.
+
+Por padrão, o SDK não lê destino da query string. Se a integração realmente
+precisar aceitar `returnTo`, `return_to` ou `redirect` da URL atual, habilite o
+comportamento explicitamente; a validação de mesma origem continua obrigatória:
+
+```js
+NvoipAuthWidget.start2FA({
+  allowReturnToFromQuery: true,
+  startVerification,
+  confirmVerification
+});
+```
+
+Prefira passar `returnTo: "/rota-interna"` diretamente. O valor entregue aos
+callbacks é normalizado para caminho, query e fragmento da origem atual.
+
 ## Canais
 
 Use `channels` para controlar o que aparece no front:

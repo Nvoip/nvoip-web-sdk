@@ -24,6 +24,7 @@
     backButtonText: "Voltar",
     closeOnSuccess: true,
     redirectOnSuccess: false,
+    allowReturnToFromQuery: false,
     returnTo: "",
     successMessage: "",
     successRedirectDelay: 750,
@@ -439,11 +440,37 @@
       const value = typeof this.options.returnTo === "function" ? this.options.returnTo(this) : this.options.returnTo;
 
       if (value) {
-        return String(value);
+        return this.normalizeReturnTo(value);
       }
 
+      if (!this.options.allowReturnToFromQuery) {
+        return "";
+      }
       const params = new URLSearchParams(window.location.search);
-      return params.get("returnTo") || params.get("return_to") || params.get("redirect") || "";
+      const queryValue = params.get("returnTo") || params.get("return_to") || params.get("redirect") || "";
+      return this.normalizeReturnTo(queryValue);
+    }
+
+    normalizeReturnTo(value) {
+      const candidate = String(value || "").trim();
+      if (!candidate) {
+        return "";
+      }
+
+      try {
+        const parsed = new URL(candidate, window.location.origin);
+        if (
+          !["http:", "https:"].includes(parsed.protocol) ||
+          parsed.origin !== window.location.origin ||
+          parsed.username ||
+          parsed.password
+        ) {
+          return "";
+        }
+        return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/";
+      } catch {
+        return "";
+      }
     }
 
     formatDescription(method) {
