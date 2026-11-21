@@ -140,6 +140,8 @@ Use quando o usuário precisa validar um telefone antes de continuar em cadastro
 `returnTo` aceita por padrão caminhos relativos e URLs HTTP/HTTPS da origem
 da página. O SDK recusa destinos externos sem autorização, URLs que começam
 com `//`, URLs com credenciais e esquemas como `javascript:` e `data:`.
+Em caminhos relativos, o SDK também recusa codificação ambígua, incluindo
+sequências percentuais aninhadas.
 
 Para permitir um destino externo, use uma URL HTTP/HTTPS absoluta e inclua
 sua origem em `allowedReturnToOrigins`. Cada entrada deve ser uma origem

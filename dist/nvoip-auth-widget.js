@@ -73,6 +73,17 @@
   channelPresets.call = channelPresets.voice;
   channelPresets.phone = channelPresets.voice;
 
+  function isUnambiguousRelativePath(path) {
+    // Inspect decoded delimiters without changing the destination we return.
+    const decoded = decodeURIComponent(path).trimStart();
+    return (
+      !decoded.startsWith("//") &&
+      !/[\\\x00-\x1f\x7f]/.test(decoded) &&
+      !/^[^/?#]*:/.test(decoded) &&
+      !/%[0-9a-f]{2}/i.test(decoded)
+    );
+  }
+
   class Widget {
     constructor(options) {
       const requestedFlow = this.normalizeFlow((options || {}).flow || defaults.flow);
@@ -460,12 +471,11 @@
       }
 
       const isAbsoluteHttpUrl = /^https?:\/\/[^/]/i.test(candidate);
-      // A relative reference cannot have a scheme in its first segment.
-      if (!isAbsoluteHttpUrl && /^[^/?#]*(?::|%(?:25)*3a)/i.test(candidate)) {
-        return "";
-      }
-
       try {
+        if (!isAbsoluteHttpUrl && !isUnambiguousRelativePath(candidate.split(/[?#]/, 1)[0])) {
+          return "";
+        }
+
         const parsed = new URL(candidate, window.location.origin);
         if (
           !["http:", "https:"].includes(parsed.protocol) ||
@@ -483,7 +493,7 @@
         }
 
         // Keep the path unambiguous when callbacks use it as a relative reference.
-        if (/^\/(?:\/|%(?:25)*(?:2f|5c))/i.test(parsed.pathname)) {
+        if (!isUnambiguousRelativePath(parsed.pathname)) {
           return "";
         }
         return `${parsed.pathname}${parsed.search}${parsed.hash}`;

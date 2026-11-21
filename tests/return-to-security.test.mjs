@@ -145,6 +145,7 @@ test("NN-6741: noncanonical navigation destinations are rejected", () => {
     "http://integrador.example/app",
     "/%2Fapp",
     "/%255Capp",
+    "/%25%32%46app",
     "javascript%3Avoid(0)",
     "data%3Atext/plain,example",
   ]) {
@@ -186,6 +187,7 @@ test("NN-6741: callbacks and navigation share the validated redirect policy", as
     ["https://externo.example/app", ""],
     ["//integrador.example/app", ""],
     ["/%2Fapp", ""],
+    ["/%25%32%46app", ""],
   ]) {
     const redirects = [];
     const callbacks = [];
