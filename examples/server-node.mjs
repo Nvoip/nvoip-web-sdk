@@ -317,9 +317,9 @@ function serveStatic(res, pathname) {
 }
 
 export const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url || "/", "http://localhost");
-
   try {
+    const url = new URL(req.url || "/", "http://localhost");
+
     if (req.method === "GET" && url.pathname === "/api/nvoip/config") {
       sendJson(res, 200, {
         flow: defaultFlow,
@@ -347,8 +347,8 @@ export const server = http.createServer(async (req, res) => {
     }
 
     sendJson(res, 404, { error: "Not found" });
-  } catch (error) {
-    sendJson(res, 500, { error: String(error.message || error) });
+  } catch {
+    sendJson(res, 500, { error: "Não foi possível processar a solicitação." });
   }
 });
 

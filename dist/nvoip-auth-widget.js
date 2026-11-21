@@ -25,6 +25,7 @@
     closeOnSuccess: true,
     redirectOnSuccess: false,
     allowReturnToFromQuery: false,
+    allowedReturnToOrigins: [],
     returnTo: "",
     successMessage: "",
     successRedirectDelay: 750,
@@ -282,8 +283,9 @@
           }
 
           if (shouldRedirect && returnTo) {
+            const destination = new URL(returnTo, window.location.origin).href;
             window.setTimeout(() => {
-              window.location.assign(returnTo);
+              window.location.assign(destination);
             }, Number(this.options.successRedirectDelay) || 0);
             return;
           }
@@ -453,7 +455,13 @@
 
     normalizeReturnTo(value) {
       const candidate = String(value || "").trim();
-      if (!candidate) {
+      if (!candidate || candidate.startsWith("//") || /[\\\x00-\x1f\x7f]/.test(candidate)) {
+        return "";
+      }
+
+      const isAbsoluteHttpUrl = /^https?:\/\/[^/]/i.test(candidate);
+      // A relative reference cannot have a scheme in its first segment.
+      if (!isAbsoluteHttpUrl && /^[^/?#]*(?::|%(?:25)*3a)/i.test(candidate)) {
         return "";
       }
 
@@ -461,13 +469,24 @@
         const parsed = new URL(candidate, window.location.origin);
         if (
           !["http:", "https:"].includes(parsed.protocol) ||
-          parsed.origin !== window.location.origin ||
           parsed.username ||
           parsed.password
         ) {
           return "";
         }
-        return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/";
+
+        if (parsed.origin !== window.location.origin) {
+          const allowedOrigins = this.options.allowedReturnToOrigins;
+          return isAbsoluteHttpUrl && Array.isArray(allowedOrigins) && allowedOrigins.includes(parsed.origin)
+            ? parsed.href
+            : "";
+        }
+
+        // Keep the path unambiguous when callbacks use it as a relative reference.
+        if (/^\/(?:\/|%(?:25)*(?:2f|5c))/i.test(parsed.pathname)) {
+          return "";
+        }
+        return `${parsed.pathname}${parsed.search}${parsed.hash}`;
       } catch {
         return "";
       }
