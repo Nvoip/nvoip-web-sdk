@@ -25,6 +25,7 @@
     closeOnSuccess: true,
     redirectOnSuccess: false,
     allowReturnToFromQuery: false,
+    allowedReturnToOrigins: [],
     returnTo: "",
     successMessage: "",
     successRedirectDelay: 750,
@@ -71,6 +72,17 @@
 
   channelPresets.call = channelPresets.voice;
   channelPresets.phone = channelPresets.voice;
+
+  function isUnambiguousRelativePath(path) {
+    // Inspect decoded delimiters without changing the destination we return.
+    const decoded = decodeURIComponent(path).trimStart();
+    return (
+      !decoded.startsWith("//") &&
+      !/[\\\x00-\x1f\x7f]/.test(decoded) &&
+      !/^[^/?#]*:/.test(decoded) &&
+      !/%[0-9a-f]{2}/i.test(decoded)
+    );
+  }
 
   class Widget {
     constructor(options) {
@@ -282,8 +294,9 @@
           }
 
           if (shouldRedirect && returnTo) {
+            const destination = new URL(returnTo, window.location.origin).href;
             window.setTimeout(() => {
-              window.location.assign(returnTo);
+              window.location.assign(destination);
             }, Number(this.options.successRedirectDelay) || 0);
             return;
           }
@@ -453,21 +466,37 @@
 
     normalizeReturnTo(value) {
       const candidate = String(value || "").trim();
-      if (!candidate) {
+      if (!candidate || candidate.startsWith("//") || /[\\\x00-\x1f\x7f]/.test(candidate)) {
         return "";
       }
 
+      const isAbsoluteHttpUrl = /^https?:\/\/[^/]/i.test(candidate);
       try {
+        if (!isAbsoluteHttpUrl && !isUnambiguousRelativePath(candidate.split(/[?#]/, 1)[0])) {
+          return "";
+        }
+
         const parsed = new URL(candidate, window.location.origin);
         if (
           !["http:", "https:"].includes(parsed.protocol) ||
-          parsed.origin !== window.location.origin ||
           parsed.username ||
           parsed.password
         ) {
           return "";
         }
-        return `${parsed.pathname}${parsed.search}${parsed.hash}` || "/";
+
+        if (parsed.origin !== window.location.origin) {
+          const allowedOrigins = this.options.allowedReturnToOrigins;
+          return isAbsoluteHttpUrl && Array.isArray(allowedOrigins) && allowedOrigins.includes(parsed.origin)
+            ? parsed.href
+            : "";
+        }
+
+        // Keep the path unambiguous when callbacks use it as a relative reference.
+        if (!isUnambiguousRelativePath(parsed.pathname)) {
+          return "";
+        }
+        return `${parsed.pathname}${parsed.search}${parsed.hash}`;
       } catch {
         return "";
       }

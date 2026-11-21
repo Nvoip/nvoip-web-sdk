@@ -137,24 +137,34 @@ Use quando o usuário precisa validar um telefone antes de continuar em cadastro
 
 ### Redirecionamento seguro
 
-`returnTo` aceita somente uma rota HTTP/HTTPS da mesma origem da página que
-carregou o SDK. Valores como `javascript:`, URLs de outro domínio e URLs com
-credenciais são recusados e o widget não redireciona.
+`returnTo` aceita por padrão caminhos relativos e URLs HTTP/HTTPS da origem
+da página. O SDK recusa destinos externos sem autorização, URLs que começam
+com `//`, URLs com credenciais e esquemas como `javascript:` e `data:`.
+Em caminhos relativos, o SDK também recusa codificação ambígua, incluindo
+sequências percentuais aninhadas.
 
-Por padrão, o SDK não lê destino da query string. Se a integração realmente
-precisar aceitar `returnTo`, `return_to` ou `redirect` da URL atual, habilite o
-comportamento explicitamente; a validação de mesma origem continua obrigatória:
+Para permitir um destino externo, use uma URL HTTP/HTTPS absoluta e inclua
+sua origem em `allowedReturnToOrigins`. Cada entrada deve ser uma origem
+canônica, com esquema, host e porta não padrão (quando aplicável), sem barra
+final, caminho, query ou fragmento. A comparação é exata.
 
 ```js
 NvoipAuthWidget.start2FA({
-  allowReturnToFromQuery: true,
+  returnTo: "https://parceiro.example:8443/conta",
+  allowedReturnToOrigins: ["https://parceiro.example:8443"],
   startVerification,
   confirmVerification
 });
 ```
 
-Prefira passar `returnTo: "/rota-interna"` diretamente. O valor entregue aos
-callbacks é normalizado para caminho, query e fragmento da origem atual.
+Se `returnTo` estiver vazio, `allowReturnToFromQuery: true` habilita a leitura
+de `returnTo`, `return_to` ou `redirect` da URL atual, sob a mesma validação.
+Mantenha a leitura desativada quando a integração já define o destino.
+
+Os callbacks recebem o caminho, a query e o fragmento para destinos da
+mesma origem, a URL absoluta para destinos externos autorizados ou uma
+string vazia para destinos recusados. Nesse último caso, o widget segue o
+fluxo de sucesso sem navegar.
 
 ## Canais
 

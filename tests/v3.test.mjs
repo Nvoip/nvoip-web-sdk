@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { once } from 'node:events';
 import test from 'node:test';
 import { createAccessToken } from '../examples/oauth-client.mjs';
 
@@ -61,5 +62,24 @@ test('OTP and 2FA send and confirm use v3 Bearer with the real request contract'
     assert.equal(new URL(checks[1].url).searchParams.get('token2fa'), 'token&é');
   } finally {
     globalThis.fetch = originalFetch;
+  }
+});
+
+test('NN-6741: the sample server returns a generic error for invalid requests', async (t) => {
+  const { server } = await import('../examples/server-node.mjs');
+  await once(server.listen(0, 'localhost'), 'listening');
+  t.after(() => new Promise((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve());
+  }));
+
+  const baseUrl = 'http://localhost:' + server.address().port;
+  for (const body of ['{', '{}']) {
+    const response = await fetch(baseUrl + '/api/nvoip/auth/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    });
+    assert.equal(response.status, 500);
+    assert.deepEqual(await response.json(), { error: 'Não foi possível processar a solicitação.' });
   }
 });
